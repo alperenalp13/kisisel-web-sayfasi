@@ -1,8 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     const ROOT = document.getElementById('root');
-    const ADMIN_USERNAME = 'admin';
-    const ADMIN_PASSWORD = '123456';
-    const AUTH_TOKEN = 'secret-admin-token';
+    // ADMIN credentials removed from client-side for security
+    
+    // Get token dynamically
+    const getAuthToken = () => localStorage.getItem('authToken');
 
     let state = {}; // Holds the entire page content
     let loggedIn = false;
@@ -312,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch('/api/content', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': AUTH_TOKEN },
+                headers: { 'Content-Type': 'application/json', 'Authorization': getAuthToken() },
                 body: JSON.stringify(data)
             });
             if (!response.ok) throw new Error(`Server error!`);

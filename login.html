@@ -45,18 +45,16 @@
         }
         .btn-login {
             background-color: var(--primary-color) !important;
-            color: #1a1a2e !important; /* Dark text for contrast with bright primary color */
+            color: #1a1a2e !important;
             border: none;
             padding: 10px;
             font-weight: bold;
-            box-shadow: 0 0 15px rgba(0, 245, 201, 0.6); /* Always visible glow */
+            box-shadow: 0 0 15px rgba(0, 245, 201, 0.6);
             transition: box-shadow 0.3s ease, transform 0.3s ease;
         }
-        .btn-login:hover, .btn-login:focus, .btn-login:active {
-            background-color: var(--primary-color) !important; /* Fixed color */
-            box-shadow: 0 0 25px rgba(0, 245, 201, 0.9); /* Slightly stronger glow on hover for feedback, but base color is fixed */
+        .btn-login:hover {
+            box-shadow: 0 0 25px rgba(0, 245, 201, 0.9);
             transform: translateY(-2px);
-            color: #1a1a2e !important;
         }
     </style>
 </head>
@@ -83,25 +81,31 @@
     </div>
 
     <script>
-        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            if (password === '123456') {
-                if (username === 'admin') {
-                    localStorage.setItem('userRole', 'admin');
-                    localStorage.setItem('authToken', 'secret-admin-token');
-                    window.location.href = '/';
-                } else if (username === 'misafir') {
-                    localStorage.setItem('userRole', 'guest');
-                    localStorage.setItem('authToken', 'guest-token'); // Fake token
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Token'ı kaydet
+                    localStorage.setItem('userRole', result.role);
+                    localStorage.setItem('authToken', result.token);
                     window.location.href = '/';
                 } else {
-                    alert('Hatalı kullanıcı adı!');
+                    alert(result.message || 'Giriş başarısız!');
                 }
-            } else {
-                alert('Hatalı şifre!');
+            } catch (error) {
+                console.error('Hata:', error);
+                alert('Sunucu hatası oluştu.');
             }
         });
     </script>

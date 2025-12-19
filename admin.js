@@ -1,12 +1,13 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    const AUTH_TOKEN = 'secret-admin-token';
     const userRole = localStorage.getItem('userRole');
-    const authToken = localStorage.getItem('authToken');
+    const authToken = localStorage.getItem('authToken'); // Get token from storage
 
-    if (userRole !== 'admin' || authToken !== AUTH_TOKEN) {
+    if (userRole !== 'admin' || !authToken) { // Check if token exists
         window.location.href = '/login';
         return;
     }
+
+    const AUTH_TOKEN = authToken; // Use the dynamic token
 
     const statProjects = document.getElementById('stat-projects');
     const statSkills = document.getElementById('stat-skills');
@@ -103,6 +104,40 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert('Mesaj silinirken hata oluştu.');
         }
     };
+
+    // User Management
+    const addUserForm = document.getElementById('addUserForm');
+    if (addUserForm) {
+        addUserForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('newUsername').value;
+            const password = document.getElementById('newPassword').value;
+            const role = document.getElementById('newRole').value;
+
+            try {
+                const response = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': AUTH_TOKEN
+                    },
+                    body: JSON.stringify({ username, password, role })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Kullanıcı başarıyla oluşturuldu!');
+                    addUserForm.reset();
+                } else {
+                    alert('Hata: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error adding user:', error);
+                alert('Bir hata oluştu.');
+            }
+        });
+    }
 
     fetchData();
 });

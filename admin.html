@@ -173,6 +173,33 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- User Management Section -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="table-card">
+                            <h5 class="mb-3">Yeni Kullanıcı Ekle</h5>
+                            <form id="addUserForm">
+                                <div class="mb-3">
+                                    <label for="newUsername" class="form-label">Kullanıcı Adı</label>
+                                    <input type="text" class="form-control" id="newUsername" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="newPassword" class="form-label">Şifre</label>
+                                    <input type="password" class="form-control" id="newPassword" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="newRole" class="form-label">Rol</label>
+                                    <select class="form-select" id="newRole">
+                                        <option value="guest">Misafir (Guest)</option>
+                                        <option value="admin">Yönetici (Admin)</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Kullanıcı Oluştur</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
