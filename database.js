@@ -2,15 +2,26 @@ const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 
 // PostgreSQL Bağlantı Ayarları
-// NOT: Kendi PostgreSQL şifrenizi 'password' kısmına yazmalısınız.
-// 'database' kısmındaki isimde bir veritabanı oluşturduğunuzdan emin olun.
-const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'kisisel_web', // Bu isimde bir DB oluşturmalısın
-    password: '123456', // PostgreSQL kurulum şifreniz
-    port: 5432,
-});
+let pool;
+
+if (process.env.DATABASE_URL) {
+    // PROD (Render.com vb.)
+    pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: {
+            rejectUnauthorized: false
+        }
+    });
+} else {
+    // LOCAL (Senin Bilgisayarın)
+    pool = new Pool({
+        user: 'postgres',
+        host: 'localhost',
+        database: 'kisisel_web',
+        password: '123456', 
+        port: 5432,
+    });
+}
 
 pool.on('error', (err) => {
     console.error('Beklenmeyen veritabanı hatası:', err);

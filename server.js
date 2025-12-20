@@ -215,7 +215,7 @@ app.post('/api/messages', async (req, res) => {
                 service: 'gmail',
                 auth: {
                     user: 'alperenalp216@gmail.com',
-                    pass: 'wrtp tcwj bnav ondq'
+                    pass: process.env.EMAIL_PASS || 'wrtp tcwj bnav ondq' // Env yoksa yerel şifreyi kullan
                 }
             });
 
