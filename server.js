@@ -244,7 +244,7 @@ app.post('/api/messages', async (req, res) => {
                 service: 'gmail',
                 auth: {
                     user: 'alperenalp216@gmail.com',
-                    pass: process.env.EMAIL_PASS || 'wrtp tcwj bnav ondq' // Env yoksa yerel şifreyi kullan
+                    pass: process.env.EMAIL_PASS || 'otgv mrfu vvkt mrns' 
                 }
             });
 
@@ -256,16 +256,21 @@ app.post('/api/messages', async (req, res) => {
             };
 
             await transporter.sendMail(mailOptions);
-            console.log('E-posta gönderildi.');
+            console.log('E-posta başarıyla gönderildi.');
+            return res.status(201).json({ message: 'Mesajınız alındı ve e-posta gönderildi.', id: result.rows[0].id });
+
         } catch (mailErr) {
-            console.error('Mail hatası:', mailErr);
+            console.error('Mail gönderim hatası:', mailErr);
+            return res.status(201).json({ 
+                message: 'Mesaj kaydedildi ancak e-posta iletilemedi. Şifre veya bağlantı sorunu olabilir.', 
+                id: result.rows[0].id, 
+                warning: true 
+            });
         }
 
-        res.status(201).json({ message: 'Alındı.', id: result.rows[0].id });
-
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Hata oluştu.' });
+        console.error('Veritabanı kayıt hatası:', err);
+        res.status(500).json({ message: 'Sunucu hatası: Mesaj kaydedilemedi.' });
     }
 });
 
