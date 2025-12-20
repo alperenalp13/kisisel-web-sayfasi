@@ -209,29 +209,6 @@ footer {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-@media (max-width: 767.98px) {
-    .hero {
-        padding: 5rem 0;
-    }
-
-    .hero h1 {
-        font-size: 2.5rem;
-    }
-
-    .profile-picture-hero {
-        width: 180px;
-        height: 180px;
-    }
-
-    .section {
-        padding: 4rem 1rem;
-    }
-
-    .section-title {
-        font-size: 2.2rem;
-    }
-}
-
 /* Admin Mode Fixed Link Style */
 .admin-mode-fixed-link {
     color: white !important; /* Sabit beyaz renk */
@@ -245,4 +222,99 @@ footer {
     color: white !important; /* Hover ve focus durumlarında da beyaz kalsın */
     background-color: transparent !important; /* Arka planı şeffaf tut */
     box-shadow: none !important; /* Gölge olmasın */
+}
+
+/* --- RESPONSIVE DESIGN --- */
+
+@media (max-width: 991.98px) {
+    /* Tablet ve altı */
+    .hero {
+        padding: 6rem 0;
+        text-align: center; /* Mobilde her zaman ortala */
+    }
+
+    .hero h1 {
+        font-size: 3rem;
+    }
+
+    .hero .col-md-6.order-md-2 {
+        /* Profil resmini yukarı al */
+        order: -1 !important; 
+        margin-bottom: 2rem;
+    }
+
+    .section {
+        padding: 4rem 0;
+    }
+
+    .navbar-collapse {
+        background: var(--bg-color);
+        padding: 1rem;
+        border-radius: 10px;
+        margin-top: 10px;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+}
+
+@media (max-width: 767.98px) {
+    /* Mobil */
+    .hero {
+        padding: 4rem 0 2rem;
+    }
+
+    .hero h1 {
+        font-size: 2.2rem;
+        line-height: 1.2;
+    }
+
+    .hero .subtitle {
+        font-size: 1.1rem;
+    }
+
+    .profile-picture-hero {
+        width: 160px;
+        height: 160px;
+        border-width: 3px;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .about-text p {
+        font-size: 1rem;
+        text-align: justify; /* Okumayı kolaylaştır */
+    }
+
+    .glass-card {
+        padding: 20px;
+    }
+
+    /* Portfolyo kartları arasındaki boşluk */
+    .portfolio-item {
+        margin-bottom: 2rem;
+    }
+
+    /* İletişim ikonları */
+    .contact-item i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .contact-item h5 {
+        font-size: 1.1rem;
+    }
+
+    /* Butonlar mobilde tam genişlik */
+    .btn-primary {
+        width: 100%;
+        padding: 10px;
+    }
+    
+    /* Navbar marka ismi */
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
 }
