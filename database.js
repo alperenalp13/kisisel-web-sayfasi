@@ -25,7 +25,6 @@ if (process.env.DATABASE_URL) {
 
 pool.on('error', (err) => {
     console.error('Beklenmeyen veritabanı hatası:', err);
-    // process.exit(-1); // Kapatma, logla ve devam et
 });
 
 const initialData = {
@@ -78,8 +77,8 @@ const initialData = {
 };
 
 async function initDb() {
-    const client = await pool.connect();
     try {
+        const client = await pool.connect();
         console.log('PostgreSQL veritabanına bağlanıldı.');
 
         // Kullanıcılar
@@ -102,8 +101,6 @@ async function initDb() {
         )`);
 
         // --- İÇERİK TABLOLARI ---
-
-        // Hero
         await client.query(`CREATE TABLE IF NOT EXISTS hero (
             id INTEGER PRIMARY KEY CHECK (id = 1),
             title TEXT,
@@ -111,7 +108,6 @@ async function initDb() {
             profileImage TEXT
         )`);
 
-        // About
         await client.query(`CREATE TABLE IF NOT EXISTS about (
             id INTEGER PRIMARY KEY CHECK (id = 1),
             title TEXT
@@ -123,7 +119,6 @@ async function initDb() {
             order_index INTEGER
         )`);
 
-        // Skills
         await client.query(`CREATE TABLE IF NOT EXISTS skills_meta (
             id INTEGER PRIMARY KEY CHECK (id = 1),
             title TEXT
@@ -135,7 +130,6 @@ async function initDb() {
             value VARCHAR(50)
         )`);
 
-        // Portfolio
         await client.query(`CREATE TABLE IF NOT EXISTS portfolio_meta (
             id INTEGER PRIMARY KEY CHECK (id = 1),
             title TEXT
@@ -151,7 +145,6 @@ async function initDb() {
             modalDescription TEXT
         )`);
 
-        // Contact
         await client.query(`CREATE TABLE IF NOT EXISTS contacts (
             id SERIAL PRIMARY KEY,
             type VARCHAR(50),
@@ -160,52 +153,28 @@ async function initDb() {
             href TEXT
         )`);
 
-        // --- SEEDING (Veri Doldurma) ---
         await seedData(client);
-
-    } catch (err) {
-        console.error('Tablo oluşturma hatası:', err);
-    } finally {
         client.release();
+    } catch (err) {
+        console.error('Veritabanı başlatma hatası:', err);
     }
 }
 
 async function seedData(client) {
-    // Admin/Misafir Check
-    const adminUsername = 'admin';
-    const adminPasswordRaw = '123456';
-    const misafirUsername = 'misafir';
-    const misafirPasswordRaw = '123456';
-
-    const adminCheck = await client.query("SELECT * FROM users WHERE username = $1", [adminUsername]);
+    const adminCheck = await client.query("SELECT * FROM users WHERE username = 'admin'");
     if (adminCheck.rows.length === 0) {
-        const hashedPassword = bcrypt.hashSync(adminPasswordRaw, 10);
-        await client.query("INSERT INTO users (username, password, role) VALUES ($1, $2, $3)", [adminUsername, hashedPassword, 'admin']);
-        console.log('Varsayılan admin oluşturuldu.');
+        const hashedPassword = bcrypt.hashSync('123456', 10);
+        await client.query("INSERT INTO users (username, password, role) VALUES ('admin', $1, 'admin')", [hashedPassword]);
     }
 
-    const misafirCheck = await client.query("SELECT * FROM users WHERE username = $1", [misafirUsername]);
-    if (misafirCheck.rows.length === 0) {
-        const hashedPassword = bcrypt.hashSync(misafirPasswordRaw, 10);
-        await client.query("INSERT INTO users (username, password, role) VALUES ($1, $2, $3)", [misafirUsername, hashedPassword, 'guest']);
-        console.log('Varsayılan misafir oluşturuldu.');
-    }
-
-    // Hero Check
     const heroCheck = await client.query("SELECT * FROM hero WHERE id = 1");
     if (heroCheck.rows.length === 0) {
         await client.query("INSERT INTO hero (id, title, subtitle, profileImage) VALUES (1, $1, $2, $3)", 
             [initialData.hero.title, initialData.hero.subtitle, initialData.hero.profileImage]);
-    } else {
-        // Fix: Update profile image if it still points to localhost
-        const currentImage = heroCheck.rows[0].profileimage; // pg returns lowercase column names
-        if (currentImage && currentImage.includes('localhost')) {
-             await client.query("UPDATE hero SET profileImage = $1 WHERE id = 1", [initialData.hero.profileImage]);
-             console.log('Hero image path fixed.');
-        }
+    } else if (heroCheck.rows[0].profileimage && heroCheck.rows[0].profileimage.includes('localhost')) {
+        await client.query("UPDATE hero SET profileImage = $1 WHERE id = 1", [initialData.hero.profileImage]);
     }
 
-    // About Check
     const aboutCheck = await client.query("SELECT count(*) as count FROM about");
     if (parseInt(aboutCheck.rows[0].count) === 0) {
         await client.query("INSERT INTO about (id, title) VALUES (1, $1)", [initialData.about.title]);
@@ -214,7 +183,6 @@ async function seedData(client) {
         }
     }
 
-    // Skills Check
     const skillsCheck = await client.query("SELECT count(*) as count FROM skills_meta");
     if (parseInt(skillsCheck.rows[0].count) === 0) {
         await client.query("INSERT INTO skills_meta (id, title) VALUES (1, $1)", [initialData.skills.title]);
@@ -223,7 +191,6 @@ async function seedData(client) {
         }
     }
 
-    // Portfolio Check
     const pfCheck = await client.query("SELECT count(*) as count FROM portfolio_meta");
     if (parseInt(pfCheck.rows[0].count) === 0) {
         await client.query("INSERT INTO portfolio_meta (id, title) VALUES (1, $1)", [initialData.portfolio.title]);
@@ -231,28 +198,9 @@ async function seedData(client) {
             await client.query("INSERT INTO projects (cardTitle, cardDescription, cardImage, modalTitle, modalImage, modalDescription) VALUES ($1, $2, $3, $4, $5, $6)", 
                 [p.cardTitle, p.cardDescription, p.cardImage, p.modalTitle, p.modalImage, p.modalDescription]);
         }
-    } else {
-        // Fix: Update project images if they point to localhost
-        const projects = await client.query("SELECT * FROM projects");
-        for (const p of projects.rows) {
-            if ((p.cardimage && p.cardimage.includes('localhost')) || (p.modalimage && p.modalimage.includes('localhost'))) {
-                 await client.query("UPDATE projects SET cardImage = $1, modalImage = $2 WHERE id = $3", 
-                    ['placeholder.png', 'placeholder.png', p.id]);
-            }
-        }
-    }
-
-    // Contact Check
-    const contactCheck = await client.query("SELECT count(*) as count FROM contacts");
-    if (parseInt(contactCheck.rows[0].count) === 0) {
-        for (const c of initialData.contact) {
-            await client.query("INSERT INTO contacts (type, title, text, href) VALUES ($1, $2, $3, $4)", 
-                [c.type, c.title, c.text, c.href]);
-        }
     }
 }
 
-// Başlangıçta tabloları oluştur
 initDb();
 
 module.exports = {
