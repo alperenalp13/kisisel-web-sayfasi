@@ -113,22 +113,23 @@ app.get('/api/content', async (req, res) => {
         const contactRes = await db.query("SELECT type, title, text, href FROM contacts ORDER BY id ASC");
 
         // Veritabanından gelen küçük harfli sütunları frontend'in beklediği camelCase formata çeviriyoruz
-        const heroRow = heroRes.rows[0] || {};
+        const heroRow = (heroRes && heroRes.rows && heroRes.rows.length > 0) ? heroRes.rows[0] : {};
+        
         const hero = {
             title: heroRow.title || "",
             subtitle: heroRow.subtitle || "",
-            profileImage: heroRow.profileimage || "profil1.jpg" // fallback to default
+            profileImage: heroRow.profileimage || "profil1.jpg" 
         };
 
-        const projects = projectsRes.rows.map(p => ({
+        const projects = (projectsRes && projectsRes.rows) ? projectsRes.rows.map(p => ({
             id: p.id,
-            cardTitle: p.cardtitle,
-            cardDescription: p.carddescription,
-            cardImage: p.cardimage,
-            modalTitle: p.modaltitle,
-            modalImage: p.modalimage,
-            modalDescription: p.modaldescription
-        }));
+            cardTitle: p.cardtitle || "",
+            cardDescription: p.carddescription || "",
+            cardImage: p.cardimage || "placeholder.png",
+            modalTitle: p.modaltitle || "",
+            modalImage: p.modalimage || "placeholder.png",
+            modalDescription: p.modaldescription || ""
+        })) : [];
 
         const data = {
             hero: hero,
