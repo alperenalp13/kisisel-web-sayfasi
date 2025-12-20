@@ -294,7 +294,7 @@ app.delete('/api/messages/:id', authenticate, async (req, res) => {
 });
 
 // Catch-all route for SPA behavior
-app.get('*', (req, res) => {
+app.get(/(.*)/, (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
