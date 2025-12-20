@@ -252,8 +252,8 @@ footer {
     }
 
     .hero .col-md-6.order-md-2 {
-        /* Profil resmini yukarı al */
-        order: -1 !important; 
+        /* Profil resmini metnin altına al (Doğal akış) */
+        /* order: -1 !important;  <- Kaldırıldı */
         margin-bottom: 2rem;
     }
 
