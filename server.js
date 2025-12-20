@@ -31,6 +31,11 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Fix for random "undefined" requests
+app.get('/undefined', (req, res) => {
+    res.redirect('/');
+});
+
 app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'login.html'));
 });
@@ -267,6 +272,11 @@ app.delete('/api/messages/:id', authenticate, async (req, res) => {
     } catch (err) {
         res.status(500).json({ message: 'Hata.' });
     }
+});
+
+// Catch-all route for SPA behavior
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.listen(PORT, () => {
