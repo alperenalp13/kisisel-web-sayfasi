@@ -142,6 +142,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     };
 
+    // --- HELPER: Base64 Converter ---
+    const convertFileToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    };
+
+    const attachFileListener = (fileInputId, textInputId) => {
+        const fileInput = document.getElementById(fileInputId);
+        const textInput = document.getElementById(textInputId);
+        if (fileInput && textInput) {
+            fileInput.addEventListener('change', async (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    try {
+                        const base64 = await convertFileToBase64(e.target.files[0]);
+                        textInput.value = base64;
+                    } catch (err) {
+                        console.error('File conversion error:', err);
+                        alert('Resim dönüştürülemedi.');
+                    }
+                }
+            });
+        }
+    };
+
+    // Attach listeners
+    attachFileListener('heroImageFile', 'heroImage');
+    attachFileListener('editCardImageFile', 'editCardImage');
+    attachFileListener('editModalImageFile', 'editModalImage');
+
     // --- HERO & ABOUT EDITOR ---
     const populateHeroAbout = () => {
         document.getElementById('heroTitle').value = currentContent.hero.title || '';

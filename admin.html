@@ -203,7 +203,12 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Profil Resmi URL</label>
-                                <input type="text" class="form-control" id="heroImage">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="heroImage" placeholder="URL veya aşağıdan yükleyin">
+                                    <button class="btn btn-outline-secondary" type="button" id="previewHeroBtn"><i class="fas fa-eye"></i></button>
+                                </div>
+                                <input type="file" class="form-control mt-2" id="heroImageFile" accept="image/*">
+                                <small class="text-muted">Bilgisayardan bir resim seçerseniz otomatik olarak dönüştürülür.</small>
                             </div>
                             <button type="submit" class="btn btn-primary">Kaydet</button>
                         </form>
@@ -330,8 +335,9 @@
                                 <input type="text" class="form-control" id="editCardTitle" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Kart Resmi (URL veya Base64)</label>
-                                <input type="text" class="form-control" id="editCardImage">
+                                <label class="form-label">Kart Resmi (URL veya Yükle)</label>
+                                <input type="text" class="form-control" id="editCardImage" placeholder="URL...">
+                                <input type="file" class="form-control mt-1" id="editCardImageFile" accept="image/*">
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label class="form-label">Kart Açıklaması (Kısa)</label>
@@ -343,8 +349,9 @@
                                 <input type="text" class="form-control" id="editModalTitle" required>
                             </div>
                              <div class="col-md-6 mb-3">
-                                <label class="form-label">Modal Resmi (URL veya Base64)</label>
-                                <input type="text" class="form-control" id="editModalImage">
+                                <label class="form-label">Modal Resmi (URL veya Yükle)</label>
+                                <input type="text" class="form-control" id="editModalImage" placeholder="URL...">
+                                <input type="file" class="form-control mt-1" id="editModalImageFile" accept="image/*">
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label class="form-label">Modal Açıklaması (Detaylı)</label>
