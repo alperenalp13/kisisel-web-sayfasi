@@ -112,8 +112,26 @@ app.get('/api/content', async (req, res) => {
         const projectsRes = await db.query("SELECT * FROM projects ORDER BY id ASC");
         const contactRes = await db.query("SELECT type, title, text, href FROM contacts ORDER BY id ASC");
 
+        // Veritabanından gelen küçük harfli sütunları frontend'in beklediği camelCase formata çeviriyoruz
+        const heroRow = heroRes.rows[0] || {};
+        const hero = {
+            title: heroRow.title || "",
+            subtitle: heroRow.subtitle || "",
+            profileImage: heroRow.profileimage || "profil1.jpg" // fallback to default
+        };
+
+        const projects = projectsRes.rows.map(p => ({
+            id: p.id,
+            cardTitle: p.cardtitle,
+            cardDescription: p.carddescription,
+            cardImage: p.cardimage,
+            modalTitle: p.modaltitle,
+            modalImage: p.modalimage,
+            modalDescription: p.modaldescription
+        }));
+
         const data = {
-            hero: heroRes.rows[0] || {},
+            hero: hero,
             about: {
                 title: aboutRes.rows[0] ? aboutRes.rows[0].title : "",
                 paragraphs: aboutParaRes.rows.map(p => p.content)
@@ -124,7 +142,7 @@ app.get('/api/content', async (req, res) => {
             },
             portfolio: {
                 title: pfMetaRes.rows[0] ? pfMetaRes.rows[0].title : "",
-                projects: projectsRes.rows
+                projects: projects
             },
             contact: contactRes.rows,
             messages: []
