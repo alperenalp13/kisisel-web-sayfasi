@@ -25,7 +25,7 @@ if (process.env.DATABASE_URL) {
 
 pool.on('error', (err) => {
     console.error('Beklenmeyen veritabanı hatası:', err);
-    process.exit(-1);
+    // process.exit(-1); // Kapatma, logla ve devam et
 });
 
 const initialData = {
