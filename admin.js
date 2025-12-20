@@ -142,13 +142,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     };
 
-    // --- HELPER: Base64 Converter ---
+    // --- HELPER: Base64 Converter with Resize ---
     const convertFileToBase64 = (file) => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Resize logic (Max width 800px)
+                    const MAX_WIDTH = 800;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Compress & Return Base64
+                    resolve(canvas.toDataURL('image/jpeg', 0.8)); // 0.8 quality JPEG
+                };
+                img.onerror = (err) => reject(err);
+            };
+            reader.onerror = (error) => reject(error);
         });
     };
 

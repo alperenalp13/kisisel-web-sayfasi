@@ -11,7 +11,8 @@ const PORT = 3000;
 // Basit bir "In-Memory" session deposu
 const sessions = {}; 
 
-app.use(express.json({ limit: '50mb' })); // Resim uploadları için limiti artırdık
+app.use(express.json({ limit: '50mb' })); 
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(__dirname));
 
 // --- Auth Middleware ---
