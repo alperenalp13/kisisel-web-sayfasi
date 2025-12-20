@@ -32,7 +32,7 @@ const initialData = {
   "hero": {
     "title": "Muhammet Alperen Alp",
     "subtitle": "Computer Programmer | IT Developer",
-    "profileImage": "http://localhost:3000/profil1.jpg"
+    "profileImage": "profil1.jpg"
   },
   "about": {
     "title": "Hakkımda",
@@ -60,9 +60,9 @@ const initialData = {
         "id": 1,
         "cardTitle": "Proje 1",
         "cardDescription": "Örnek proje açıklaması.",
-        "cardImage": "http://localhost:3000/placeholder.png",
+        "cardImage": "placeholder.png",
         "modalTitle": "Proje 1 Detayları",
-        "modalImage": "http://localhost:3000/placeholder.png",
+        "modalImage": "placeholder.png",
         "modalDescription": "Detaylı proje açıklaması."
       }
     ]
@@ -192,10 +192,17 @@ async function seedData(client) {
     }
 
     // Hero Check
-    const heroCheck = await client.query("SELECT count(*) as count FROM hero");
-    if (parseInt(heroCheck.rows[0].count) === 0) {
+    const heroCheck = await client.query("SELECT * FROM hero WHERE id = 1");
+    if (heroCheck.rows.length === 0) {
         await client.query("INSERT INTO hero (id, title, subtitle, profileImage) VALUES (1, $1, $2, $3)", 
             [initialData.hero.title, initialData.hero.subtitle, initialData.hero.profileImage]);
+    } else {
+        // Fix: Update profile image if it still points to localhost
+        const currentImage = heroCheck.rows[0].profileimage; // pg returns lowercase column names
+        if (currentImage && currentImage.includes('localhost')) {
+             await client.query("UPDATE hero SET profileImage = $1 WHERE id = 1", [initialData.hero.profileImage]);
+             console.log('Hero image path fixed.');
+        }
     }
 
     // About Check
@@ -223,6 +230,15 @@ async function seedData(client) {
         for (const p of initialData.portfolio.projects) {
             await client.query("INSERT INTO projects (cardTitle, cardDescription, cardImage, modalTitle, modalImage, modalDescription) VALUES ($1, $2, $3, $4, $5, $6)", 
                 [p.cardTitle, p.cardDescription, p.cardImage, p.modalTitle, p.modalImage, p.modalDescription]);
+        }
+    } else {
+        // Fix: Update project images if they point to localhost
+        const projects = await client.query("SELECT * FROM projects");
+        for (const p of projects.rows) {
+            if ((p.cardimage && p.cardimage.includes('localhost')) || (p.modalimage && p.modalimage.includes('localhost'))) {
+                 await client.query("UPDATE projects SET cardImage = $1, modalImage = $2 WHERE id = $3", 
+                    ['placeholder.png', 'placeholder.png', p.id]);
+            }
         }
     }
 
