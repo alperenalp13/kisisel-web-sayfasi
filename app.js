@@ -339,7 +339,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Prevent duplicate buttons
             if (!document.getElementById('logout-btn-li')) {
-                loginNavItem.insertAdjacentHTML('beforebegin', '<li class="nav-item" id="logout-btn-li"><a href="#" class="nav-link">Çıkış</a></li><li class="nav-item" id="save-btn-li"><a href="#" class="nav-link">Kaydet</a></li>');
+                // Sıralama: Yönetim Paneli - Kaydet - Çıkış
+                loginNavItem.insertAdjacentHTML('afterend', '<li class="nav-item" id="save-btn-li"><a href="#" class="nav-link">Kaydet</a></li><li class="nav-item" id="logout-btn-li"><a href="#" class="nav-link">Çıkış</a></li>');
                 
                 document.getElementById('logout-btn-li').addEventListener('click', () => {
                     localStorage.removeItem('userRole');
