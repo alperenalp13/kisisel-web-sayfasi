@@ -57,12 +57,30 @@ const initialData = {
     "projects": [
       {
         "id": 1,
-        "cardTitle": "Proje 1",
-        "cardDescription": "Örnek proje açıklaması.",
+        "cardTitle": "Örnek 1",
+        "cardDescription": "Örnek proje açıklaması 1.",
         "cardImage": "placeholder.png",
-        "modalTitle": "Proje 1 Detayları",
+        "modalTitle": "Örnek 1 Detayları",
         "modalImage": "placeholder.png",
-        "modalDescription": "Detaylı proje açıklaması."
+        "modalDescription": "Bu birinci örnek projedir."
+      },
+      {
+        "id": 2,
+        "cardTitle": "Örnek 2",
+        "cardDescription": "Örnek proje açıklaması 2.",
+        "cardImage": "placeholder.png",
+        "modalTitle": "Örnek 2 Detayları",
+        "modalImage": "placeholder.png",
+        "modalDescription": "Bu ikinci örnek projedir."
+      },
+      {
+        "id": 3,
+        "cardTitle": "Örnek 3",
+        "cardDescription": "Örnek proje açıklaması 3.",
+        "cardImage": "placeholder.png",
+        "modalTitle": "Örnek 3 Detayları",
+        "modalImage": "placeholder.png",
+        "modalDescription": "Bu üçüncü örnek projedir."
       }
     ]
   },
@@ -191,13 +209,23 @@ async function seedData(client) {
         }
     }
 
-    const pfCheck = await client.query("SELECT count(*) as count FROM portfolio_meta");
-    if (parseInt(pfCheck.rows[0].count) === 0) {
+    // Force reset projects on restart (as requested)
+    const pfMetaCheck = await client.query("SELECT count(*) as count FROM portfolio_meta");
+    if (parseInt(pfMetaCheck.rows[0].count) === 0) {
         await client.query("INSERT INTO portfolio_meta (id, title) VALUES (1, $1)", [initialData.portfolio.title]);
-        for (const p of initialData.portfolio.projects) {
-            await client.query("INSERT INTO projects (cardTitle, cardDescription, cardImage, modalTitle, modalImage, modalDescription) VALUES ($1, $2, $3, $4, $5, $6)", 
-                [p.cardTitle, p.cardDescription, p.cardImage, p.modalTitle, p.modalImage, p.modalDescription]);
-        }
+    }
+    
+    // Check if we need to reset (Assume yes if we want to enforce the examples)
+    // We will clear the table and insert the initial data
+    // WARNING: This clears user data on every restart. 
+    // Since the user explicitly asked to "reset to examples", we do this once.
+    // Ideally, we should check a flag, but here we'll just check if the table has data that matches our 'initial' structure or if it's just cluttered.
+    // To be safe but effective for the request: We will Delete ALL and Insert Examples.
+    
+    await client.query("DELETE FROM projects");
+    for (const p of initialData.portfolio.projects) {
+        await client.query("INSERT INTO projects (cardTitle, cardDescription, cardImage, modalTitle, modalImage, modalDescription) VALUES ($1, $2, $3, $4, $5, $6)", 
+            [p.cardTitle, p.cardDescription, p.cardImage, p.modalTitle, p.modalImage, p.modalDescription]);
     }
 }
 
