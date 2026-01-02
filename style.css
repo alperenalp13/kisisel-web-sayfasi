@@ -332,3 +332,105 @@ footer {
         font-size: 1.1rem;
     }
 }
+
+/* --- ADMIN PANEL & LOGIN RESPONSIVE CSS --- */
+
+/* Login Card Responsive */
+@media (max-width: 576px) {
+    .login-card {
+        padding: 1.5rem;
+        margin: 0 15px;
+    }
+    .login-title {
+        font-size: 1.8rem;
+    }
+}
+
+/* Admin Sidebar Responsive */
+@media (max-width: 768px) {
+    /* Admin Panel Sidebar */
+    .sidebar {
+        transform: translateX(-100%);
+        z-index: 1050; /* Bootstrap modal z-index is 1055, sidebar should be below modal but above content */
+        width: 260px;
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100%;
+        box-shadow: none; /* Gizliyken gölge olmasın */
+    }
+
+    .sidebar.show {
+        transform: translateX(0);
+        box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+    }
+
+    /* Admin Panel Content */
+    .content {
+        margin-left: 0 !important; /* Sidebar kayınca içeriği genişlet */
+        padding: 15px;
+        padding-top: 20px;
+        width: 100%;
+        overflow-x: hidden; /* Yatay taşmayı engelle */
+    }
+
+    /* Admin Navbar */
+    .navbar-admin {
+        flex-direction: column;
+        align-items: stretch; /* Tam genişlik */
+        gap: 15px;
+        padding: 15px;
+    }
+    
+    .navbar-admin > div {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Sidebar Toggle Button */
+    #sidebarToggle {
+        padding: 5px 10px;
+        font-size: 1.2rem;
+    }
+
+    /* İstatistik Kartları */
+    .stat-card {
+        margin-bottom: 15px;
+        padding: 20px;
+    }
+    
+    .stat-card h3 {
+        font-size: 22px;
+    }
+
+    /* Tablolar */
+    .table-responsive {
+        font-size: 0.85rem;
+        border: 1px solid #eee; /* Sınırları belirginleştir */
+        border-radius: 5px;
+    }
+    
+    /* Overlay for sidebar */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1040; /* Sidebar'ın hemen altında */
+        backdrop-filter: blur(2px);
+    }
+    
+    .sidebar-overlay.show {
+        display: block;
+    }
+    
+    /* Form elemanları mobilde */
+    .form-control, .btn {
+        font-size: 14px;
+    }
+}

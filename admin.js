@@ -30,9 +30,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sidebarLinks = document.querySelectorAll('.sidebar .nav-link');
 
     // --- Navigation Logic ---
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+
+    // Toggle Sidebar (Mobile)
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        });
+    }
+
+    // Close Sidebar when clicking overlay
+    if (overlay) {
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('show');
+            overlay.classList.remove('show');
+        });
+    }
+
     sidebarLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
+            
+            // Auto-close sidebar on mobile when a link is clicked
+            if (window.innerWidth < 768) {
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
+            }
+
             // Active State
             sidebarLinks.forEach(l => l.classList.remove('active'));
             link.classList.add('active');
