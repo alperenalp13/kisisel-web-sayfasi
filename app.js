@@ -335,31 +335,29 @@ document.addEventListener('DOMContentLoaded', () => {
             loginNavItem.querySelector('a').classList.add('admin-mode-fixed-link');
             loginNavItem.querySelector('a').textContent = 'Yönetim Paneli';
             loginNavItem.querySelector('a').href = '/admin'; 
-            loginNavItem.style.display = 'list-item'; // Ensure it's visible if it was hidden by other means
-        }
+            loginNavItem.style.display = 'list-item'; 
+            
+            // Prevent duplicate buttons
+            if (!document.getElementById('logout-btn-li')) {
+                loginNavItem.insertAdjacentHTML('beforebegin', '<li class="nav-item" id="logout-btn-li"><a href="#" class="nav-link">Çıkış</a></li><li class="nav-item" id="save-btn-li"><a href="#" class="nav-link">Kaydet</a></li>');
+                
+                document.getElementById('logout-btn-li').addEventListener('click', () => {
+                    localStorage.removeItem('userRole');
+                    localStorage.removeItem('authToken');
+                    window.location.reload();
+                });
 
-        const navList = document.querySelector('#navbarNav .navbar-nav');
-        // Prevent duplicate buttons if enableEditing called multiple times
-        if (!document.getElementById('logout-btn-li')) {
-            navList.insertAdjacentHTML('beforeend', '<li class="nav-item ms-auto" id="logout-btn-li"><a href="#" class="nav-link">Çıkış</a></li><li class="nav-item" id="save-btn-li"><a href="#" class="nav-link">Kaydet</a></li>');
-            console.log('Logout and Save buttons added to navbar.'); // Debugging
-
-            document.getElementById('logout-btn-li').addEventListener('click', () => {
-                localStorage.removeItem('userRole');
-                localStorage.removeItem('authToken');
-                window.location.reload();
-            });
-
-            document.getElementById('save-btn-li').addEventListener('click', async (e) => {
-                e.preventDefault();
-                if (localStorage.getItem('userRole') === 'guest') {
-                     alert('Bu işlem için yetkiniz bulunmamaktadır (Misafir Modu).');
-                     return;
-                }
-                await saveContentToServer();
-                disableEditing();
-                window.location.reload();
-            });
+                document.getElementById('save-btn-li').addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    if (localStorage.getItem('userRole') === 'guest') {
+                         alert('Bu işlem için yetkiniz bulunmamaktadır (Misafir Modu).');
+                         return;
+                    }
+                    await saveContentToServer();
+                    disableEditing();
+                    window.location.reload();
+                });
+            }
         }
 
 
