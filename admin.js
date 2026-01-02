@@ -84,67 +84,61 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Data Fetching ---
     const fetchData = async () => {
         try {
-            // Fetch Content
+            // 1. İçeriği Çek (Herkes görebilir)
             const contentRes = await fetch('/api/content');
             currentContent = await contentRes.json();
 
-            // Fetch Messages (only for dashboard)
-            const messagesRes = await fetch('/api/messages', {
-                headers: { 'Authorization': AUTH_TOKEN }
-            });
-            const messages = await messagesRes.json();
-
-            updateDashboardStats(currentContent, messages);
-            renderMessages(messages);
-            
-            // Populate Editors
+            // Populate Editors (İçerik her durumda gösterilmeli)
             populateHeroAbout();
             renderSkillsTable();
             renderPortfolioTable();
             renderContactsTable();
 
-        } catch (error) {
-            console.error('Data fetch error:', error);
-        }
-    };
-
-    // --- SAVE FUNCTION (Core) ---
-    const saveContent = async () => {
-        try {
-            const response = await fetch('/api/content', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': AUTH_TOKEN
-                },
-                body: JSON.stringify(currentContent)
-            });
-
-            if (response.ok) {
-                alert('Değişiklikler başarıyla kaydedildi!');
-                fetchData(); // Refresh to ensure sync
-            } else {
-                const err = await response.json();
-                alert('Hata: ' + err.message);
+            // 2. Mesajları Çek (Sadece Admin yetkisiyle)
+            try {
+                const messagesRes = await fetch('/api/messages', {
+                    headers: { 'Authorization': AUTH_TOKEN }
+                });
+                
+                if (messagesRes.ok) {
+                    const messages = await messagesRes.json();
+                    updateDashboardStats(currentContent, messages);
+                    renderMessages(messages);
+                } else {
+                    console.warn('Mesajlar çekilemedi (Yetki eksik olabilir)');
+                    updateDashboardStats(currentContent, []);
+                    renderMessages([]);
+                }
+            } catch (msgError) {
+                console.error('Mesaj çekme hatası:', msgError);
+                updateDashboardStats(currentContent, []);
+                renderMessages([]);
             }
+
         } catch (error) {
-            console.error('Save error:', error);
-            alert('Kaydetme başarısız.');
+            console.error('Genel veri çekme hatası:', error);
         }
     };
 
     // --- DASHBOARD LOGIC ---
     const updateDashboardStats = (content, messages) => {
-        document.getElementById('stat-projects').textContent = content.portfolio.projects.length;
-        document.getElementById('stat-skills').textContent = content.skills.skillList.length;
-        document.getElementById('stat-messages').textContent = messages.length;
-        document.getElementById('stat-unread').textContent = messages.filter(m => !m.read).length; // Backend doesn't support 'read' yet fully but structure is there
+        if (!content || !content.portfolio) return;
+        
+        document.getElementById('stat-projects').textContent = content.portfolio.projects ? content.portfolio.projects.length : 0;
+        document.getElementById('stat-skills').textContent = (content.skills && content.skills.skillList) ? content.skills.skillList.length : 0;
+        
+        // Mesajlar dizi değilse 0 göster
+        const msgList = Array.isArray(messages) ? messages : [];
+        document.getElementById('stat-messages').textContent = msgList.length;
+        document.getElementById('stat-unread').textContent = msgList.filter(m => !m.read).length;
     };
 
     const renderMessages = (messages) => {
         const tbody = document.getElementById('messages-table-body');
-        if (messages.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center">Henüz mesaj yok.</td></tr>';
+        if (!tbody) return;
+
+        if (!Array.isArray(messages) || messages.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center">Mesaj bulunamadı veya yetkiniz yok.</td></tr>';
             return;
         }
         tbody.innerHTML = messages.map(m => `
