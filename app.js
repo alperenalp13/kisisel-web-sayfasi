@@ -215,6 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="col-lg-8">
                             <div class="glass-card">
                                 <h3 class="text-center mb-4">Görüş ve Önerileriniz</h3>
+                                <div id="contact-success-message" class="alert alert-success d-none text-center" role="alert">Mesajınız iletilmiştir.</div>
                                 <form id="contactForm">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -775,7 +776,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (response.ok) {
-                    alert('Mesajınız başarıyla gönderildi!');
+                    const msgDiv = document.getElementById('contact-success-message');
+                    if(msgDiv) {
+                        msgDiv.classList.remove('d-none');
+                        setTimeout(() => msgDiv.classList.add('d-none'), 3000);
+                    }
                     e.target.reset();
                 } else {
                     throw new Error('Mesaj gönderilemedi.');
