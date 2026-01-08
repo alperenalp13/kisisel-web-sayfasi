@@ -19,7 +19,7 @@ if (process.env.DATABASE_URL) {
         user: process.env.DB_USER || 'postgres',
         host: process.env.DB_HOST || 'localhost',
         database: process.env.DB_NAME || 'kisisel_web',
-        password: process.env.DB_PASSWORD || '123456', 
+        password: process.env.DB_PASSWORD, 
         port: process.env.DB_PORT || 5432,
     });
 }
@@ -205,7 +205,24 @@ async function seedData(client) {
         console.warn("UYARI: ADMIN_PASSWORD çevre değişkeni bulunamadı. Admin şifresi güncellenmedi.");
     }
 
-    // 2. Diğer Başlangıç Verileri (Hero, About, vb.)
+    // 2. Misafir Kullanıcısı Güncelleme/Ekleme
+    const guestUser = process.env.GUEST_USERNAME || 'misafir';
+    const guestPass = process.env.GUEST_PASSWORD;
+
+    if (guestPass) {
+        const hashedPassword = bcrypt.hashSync(guestPass, 10);
+        const guestCheck = await client.query("SELECT * FROM users WHERE username = $1", [guestUser]);
+
+        if (guestCheck.rows.length === 0) {
+            await client.query("INSERT INTO users (username, password, role) VALUES ($1, $2, 'guest')", [guestUser, hashedPassword]);
+            console.log(`Misafir kullanıcısı oluşturuldu: ${guestUser}`);
+        } else {
+            await client.query("UPDATE users SET password = $1 WHERE username = $2", [hashedPassword, guestUser]);
+            console.log(`Misafir şifresi güncellendi: ${guestUser}`);
+        }
+    }
+
+    // 3. Diğer Başlangıç Verileri (Hero, About, vb.)
     const heroCheck = await client.query("SELECT * FROM hero WHERE id = 1");
     if (heroCheck.rows.length === 0) {
         await client.query("INSERT INTO hero (id, title, subtitle, profileImage) VALUES (1, $1, $2, $3)", 

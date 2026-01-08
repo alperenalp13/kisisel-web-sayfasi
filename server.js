@@ -245,7 +245,7 @@ app.post('/api/messages', async (req, res) => {
                 service: 'gmail',
                 auth: {
                     user: 'alperenalp216@gmail.com',
-                    pass: process.env.EMAIL_PASS || 'otgv mrfu vvkt mrns' 
+                    pass: process.env.EMAIL_PASS 
                 }
             });
 
