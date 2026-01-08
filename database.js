@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 
@@ -15,11 +16,11 @@ if (process.env.DATABASE_URL) {
 } else {
     // LOCAL (Senin Bilgisayarın)
     pool = new Pool({
-        user: 'postgres',
-        host: 'localhost',
-        database: 'kisisel_web',
-        password: '123456', 
-        port: 5432,
+        user: process.env.DB_USER || 'postgres',
+        host: process.env.DB_HOST || 'localhost',
+        database: process.env.DB_NAME || 'kisisel_web',
+        password: process.env.DB_PASSWORD || '123456', 
+        port: process.env.DB_PORT || 5432,
     });
 }
 
@@ -179,12 +180,32 @@ async function initDb() {
 }
 
 async function seedData(client) {
-    const adminCheck = await client.query("SELECT * FROM users WHERE username = 'admin'");
-    if (adminCheck.rows.length === 0) {
-        const hashedPassword = bcrypt.hashSync('123456', 10);
-        await client.query("INSERT INTO users (username, password, role) VALUES ('admin', $1, 'admin')", [hashedPassword]);
+    // 1. Admin Kullanıcısı Güncelleme/Ekleme
+    // ENV'den admin şifresini al, yoksa varsayılanı kullan (Güvenlik için .env kullanılmalı)
+    const adminUser = process.env.ADMIN_USERNAME || 'admin';
+    const adminPass = process.env.ADMIN_PASSWORD;
+
+    if (adminPass) {
+        const hashedPassword = bcrypt.hashSync(adminPass, 10);
+        
+        // Önce admin var mı kontrol et
+        const adminCheck = await client.query("SELECT * FROM users WHERE username = $1", [adminUser]);
+        
+        if (adminCheck.rows.length === 0) {
+            // Yoksa oluştur
+            await client.query("INSERT INTO users (username, password, role) VALUES ($1, $2, 'admin')", [adminUser, hashedPassword]);
+            console.log(`Admin kullanıcısı oluşturuldu: ${adminUser}`);
+        } else {
+            // Varsa şifresini güncelle (ENV'deki şifreyle eşitle)
+            // Bu sayede .env dosyasındaki şifre değiştirilince veritabanı da güncellenir.
+            await client.query("UPDATE users SET password = $1 WHERE username = $2", [hashedPassword, adminUser]);
+            console.log(`Admin şifresi güncellendi: ${adminUser}`);
+        }
+    } else {
+        console.warn("UYARI: ADMIN_PASSWORD çevre değişkeni bulunamadı. Admin şifresi güncellenmedi.");
     }
 
+    // 2. Diğer Başlangıç Verileri (Hero, About, vb.)
     const heroCheck = await client.query("SELECT * FROM hero WHERE id = 1");
     if (heroCheck.rows.length === 0) {
         await client.query("INSERT INTO hero (id, title, subtitle, profileImage) VALUES (1, $1, $2, $3)", 
@@ -209,23 +230,17 @@ async function seedData(client) {
         }
     }
 
-    // Force reset projects on restart (as requested)
+    // Projeleri her başlangıçta sıfırlama mantığı (isteğe bağlı, şu anki yapıda korunuyor)
     const pfMetaCheck = await client.query("SELECT count(*) as count FROM portfolio_meta");
     if (parseInt(pfMetaCheck.rows[0].count) === 0) {
         await client.query("INSERT INTO portfolio_meta (id, title) VALUES (1, $1)", [initialData.portfolio.title]);
-    }
-    
-    // Check if we need to reset (Assume yes if we want to enforce the examples)
-    // We will clear the table and insert the initial data
-    // WARNING: This clears user data on every restart. 
-    // Since the user explicitly asked to "reset to examples", we do this once.
-    // Ideally, we should check a flag, but here we'll just check if the table has data that matches our 'initial' structure or if it's just cluttered.
-    // To be safe but effective for the request: We will Delete ALL and Insert Examples.
-    
-    await client.query("DELETE FROM projects");
-    for (const p of initialData.portfolio.projects) {
-        await client.query("INSERT INTO projects (cardTitle, cardDescription, cardImage, modalTitle, modalImage, modalDescription) VALUES ($1, $2, $3, $4, $5, $6)", 
-            [p.cardTitle, p.cardDescription, p.cardImage, p.modalTitle, p.modalImage, p.modalDescription]);
+        
+        // Sadece ilk kurulumda örnek verileri ekle, mevcut verileri silme
+        await client.query("DELETE FROM projects");
+        for (const p of initialData.portfolio.projects) {
+            await client.query("INSERT INTO projects (cardTitle, cardDescription, cardImage, modalTitle, modalImage, modalDescription) VALUES ($1, $2, $3, $4, $5, $6)", 
+                [p.cardTitle, p.cardDescription, p.cardImage, p.modalTitle, p.modalImage, p.modalDescription]);
+        }
     }
 }
 
